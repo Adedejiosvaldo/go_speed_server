@@ -47,8 +47,48 @@ func downloadSpeedTest(ctx *gin.Context, filePath string) {
 		"file_size":      fmt.Sprintf("%.2f MB/s", float64(fileInfo.Size())),
 	})
 }
-func uploadsTest(ctx *gin.Context) {
+func uploadsTest(ctx *gin.Context, fileName string) {
 
+	tempFile, err := os.Open(fileName)
+
+	if err != nil {
+		ctx.JSON(500, gin.H{"Error": err.Error()})
+		return
+	}
+
+	defer tempFile.Close()
+
+	start := time.Now()
+
+	destFile, err := os.Create("uploaded_Testfilt.txt")
+
+	if err != nil {
+		ctx.JSON(500, gin.H{"Error": err.Error()})
+		return
+	}
+
+	defer destFile.Close()
+
+	_, err = io.Copy(destFile, tempFile)
+
+	if err != nil {
+		ctx.JSON(500, gin.H{"Error": err.Error()})
+		return
+	}
+
+	timeElapsed := time.Since(start)
+
+	fileInfo, err := tempFile.Stat()
+	if err != nil {
+		ctx.JSON(500, gin.H{"Error": err.Error()})
+		return
+	}
+	uploadSpeed := float64(fileInfo.Size()) / 1024 / 1024 / timeElapsed.Seconds()
+	ctx.JSON(200, gin.H{
+		"upload_time":  timeElapsed.String(),
+		"upload_speed": fmt.Sprintf("%.2f MB/s", uploadSpeed),
+		"file_size":    fmt.Sprintf("%.2f MB", float64(fileInfo.Size())/1024/1024),
+	})
 }
 func pingTest(ctx *gin.Context) {
 	start := time.Now()
