@@ -1,10 +1,25 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"time"
+
+	"github.com/gin-gonic/gin"
+)
 
 // uploads
 
+func uploadsTest(ctx *gin.Context) {
+	timeStarted := time.Now()
+
+	sampleLoad := make([]byte, 100*1024*1024)
+
+	diffInTime := time.Duration(timeStarted)
+
+}
+
 // downloads
+
+func 
 
 // pings
 
