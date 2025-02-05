@@ -23,20 +23,17 @@ func DownloadSpeedTest(ctx *gin.Context, filePath string) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	defer file.Close() // Ensure the file is closed once the function exits
+	defer file.Close()
 
-	// Get file info for size calculation
 	fileInfo, err := file.Stat()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Set the Content-Type header
 	ctx.Header("Content-Type", "application/octet-stream")
 	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileInfo.Name()))
 
-	// Start measuring the download time (on the server side)
 	start := time.Now()
 
 	// Stream the file to the client
@@ -48,16 +45,9 @@ func DownloadSpeedTest(ctx *gin.Context, filePath string) {
 		return
 	}
 
-	// Calculate the download time and speed on the server side (not client-side)
 	timeElapsed := time.Since(start)
 	downloadSpeed := float64(fileInfo.Size()) / 1024 / 1024 / timeElapsed.Seconds() // Speed in MB/s
-
-	// Send back the download stats (for server side calculation)
-	ctx.JSON(http.StatusOK, gin.H{
-		"download_time":  timeElapsed.String(),
-		"download_speed": fmt.Sprintf("%.2f MB/s", downloadSpeed),
-		"file_size":      fmt.Sprintf("%.2f MB", float64(fileInfo.Size())/1024/1024),
-	})
+	fmt.Printf("Download Speed: %.2f MB/s, Time: %s\n", downloadSpeed, timeElapsed)
 }
 
 func UploadsTest(ctx *gin.Context, fileName string) {
@@ -103,6 +93,7 @@ func UploadsTest(ctx *gin.Context, fileName string) {
 		"file_size":    fmt.Sprintf("%.2f MB", float64(fileInfo.Size())/1024/1024),
 	})
 }
+
 func PingTest(ctx *gin.Context) {
-	ctx.JSON(200, gin.H{"message": "pong", "latency": time.Since(start).String()})
+	ctx.JSON(http.StatusOK, gin.H{"message": "pong", "timestamp": time.Now().UnixNano()})
 }
