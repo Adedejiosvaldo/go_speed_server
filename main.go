@@ -46,8 +46,8 @@ func main() {
 	router.Use(cors.Default())
 
 	router.GET("/ping", cmd.PingTest)
-	router.POST("/upload", cmd.UploadsTest())
-	router.GET("/download", cmd.DownloadSpeedTestHandler("testfile.dat")) // Change file path
+	router.POST("/upload", cmd.UploadsTest)
+	router.GET("/download", cmd.DownloadSpeedTestHandler("testfile.txt")) // Change file path
 
 	// Start server
 	fmt.Println("Speedtest server running on port 8080")

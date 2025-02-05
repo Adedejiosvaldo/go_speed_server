@@ -1,6 +1,6 @@
 module github.com/adedejiosvaldo/go_speedtest_server
 
-go 1.23.5
+go 1.23.4
 
 require (
 	github.com/bytedance/sonic v1.12.8 // indirect

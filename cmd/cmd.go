@@ -50,7 +50,7 @@ func DownloadSpeedTest(ctx *gin.Context, filePath string) {
 	fmt.Printf("Download Speed: %.2f MB/s, Time: %s\n", downloadSpeed, timeElapsed)
 }
 
-func UploadsTest(ctx *gin.Context, fileName string) {
+func UploadsTest(ctx *gin.Context) {
 
 	file, err := ctx.FormFile("file")
 
