@@ -52,45 +52,47 @@ func DownloadSpeedTest(ctx *gin.Context, filePath string) {
 
 func UploadsTest(ctx *gin.Context, fileName string) {
 
-	tempFile, err := os.Open(fileName)
+	file, err := ctx.FormFile("file")
 
 	if err != nil {
-		ctx.JSON(500, gin.H{"Error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "No file received"})
 		return
 	}
 
-	defer tempFile.Close()
-
-	start := time.Now()
-
-	destFile, err := os.Create("uploaded_Testfilt.txt")
+	src, err := file.Open()
 
 	if err != nil {
-		ctx.JSON(500, gin.H{"Error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	defer src.Close()
+
+	destFile, err := os.Create("uploaded_test_file.txt")
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	defer destFile.Close()
 
-	_, err = io.Copy(destFile, tempFile)
+	start := time.Now()
+
+	size, err := io.Copy(destFile, src)
 
 	if err != nil {
-		ctx.JSON(500, gin.H{"Error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	timeElapsed := time.Since(start)
 
-	fileInfo, err := tempFile.Stat()
-	if err != nil {
-		ctx.JSON(500, gin.H{"Error": err.Error()})
-		return
-	}
-	uploadSpeed := float64(fileInfo.Size()) / 1024 / 1024 / timeElapsed.Seconds()
+	uploadSpeed := float64(size) / 1024 / 1024 / timeElapsed.Seconds()
 	ctx.JSON(200, gin.H{
 		"upload_time":  timeElapsed.String(),
 		"upload_speed": fmt.Sprintf("%.2f MB/s", uploadSpeed),
-		"file_size":    fmt.Sprintf("%.2f MB", float64(fileInfo.Size())/1024/1024),
+		"file_size":    fmt.Sprintf("%.2f MB", float64(size)/1024/1024),
 	})
 }
 

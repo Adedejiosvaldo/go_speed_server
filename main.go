@@ -32,12 +32,9 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"math/rand"
-	"net/http"
-	"time"
 
+	"github.com/adedejiosvaldo/go_speedtest_server/cmd"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -48,69 +45,13 @@ func main() {
 	// Configure CORS
 	router.Use(cors.Default())
 
-	// Ping endpoint
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-
-	// Download test endpoint
-	router.GET("/download", func(c *gin.Context) {
-		// Set default size to 10MB
-		size := 10 * 1024 * 1024 // 10 MB
-		if customSize := c.Query("size"); customSize != "" {
-			// Parse custom size from query parameter
-			var err error
-			size, err = parseInt(customSize)
-			if err != nil {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid size parameter"})
-				return
-			}
-		}
-
-		// Generate random data
-		data := generateRandomData(size)
-
-		// Set headers for octet-stream
-		c.DataFromReader(
-			http.StatusOK,
-			int64(size),
-			"application/octet-stream",
-			bytes.NewReader(data),
-			map[string]string{
-				"Content-Disposition": `attachment; filename="test.data"`,
-			},
-		)
-	})
-
-	// Upload test endpoint
-	// router.POST("/upload", func(c *gin.Context) {
-	// 	// Discard the uploaded data but count the bytes
-	// 	size, err := c.Request.Body.(io.ReaderFrom).ReadFrom(io.Discard)
-	// 	if err != nil {
-	// 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "upload failed"})
-	// 		return
-	// 	}
-
-	// 	c.JSON(http.StatusOK, gin.H{
-	// 		"size": size,
-	// 	})
-	// })
+	router.GET("/ping", cmd.PingTest)
+	router.POST("/upload", cmd.UploadsTest())
+	router.GET("/download", cmd.DownloadSpeedTestHandler("testfile.dat")) // Change file path
 
 	// Start server
+	fmt.Println("Speedtest server running on port 8080")
 	router.Run(":8080")
-}
 
-func generateRandomData(size int) []byte {
-	data := make([]byte, size)
-	rand.Seed(time.Now().UnixNano())
-	rand.Read(data)
-	return data
-}
-
-func parseInt(s string) (int, error) {
-	var size int
-	_, err := fmt.Sscanf(s, "%d", &size)
-	return size, err
+	router.Run(":8080")
 }
