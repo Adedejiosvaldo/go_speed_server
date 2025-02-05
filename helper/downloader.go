@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func generateLargeFile(filePath string, sizeInMB int) error {
+func GenerateLargeFile(filePath string, sizeInMB int) error {
 	file, err := os.Create(filePath)
 	if err != nil {
 		return err
